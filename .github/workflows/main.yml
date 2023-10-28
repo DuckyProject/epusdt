@@ -1,0 +1,38 @@
+name: Go
+# Controls when the workflow will run
+on:
+  release:
+    types: [published]
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Setup Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: ^1.21.0
+      - name: Cache go module
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+      - name: Build
+        run: |
+            strings /lib/x86_64-linux-gnu/libc.so.6 |grep GLIBC_
+            cd src
+            go build main.go
+            ls
+            
+      - name: upload result
+        uses: actions/upload-artifact@v1
+        with:
+          name: main
+          path: ${{ github.workspace }}/main
